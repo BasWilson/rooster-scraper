@@ -1,14 +1,14 @@
 var APP_NAME = 'Rooster',
-    APP_VERSION = 4,
+    APP_VERSION = 10,
     CACHE_NAME = APP_NAME + '_' + APP_VERSION;
 var filesToCache = [
   './',
   './?utm_source=homescreen',
-  './main.css',
-  './main.js',
-  './tools.js',
-  './mobileify.js',
-  './GoogleSans-Regular.ttf'
+  './css/main.min.css',
+  './js/main.min.js',
+  './js/tools.min.js',
+  './js/mobileify.min.js',
+  './css/GoogleSans-Regular.ttf'
 ];
 
 // Service worker from Google Documentation

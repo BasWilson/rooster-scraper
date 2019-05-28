@@ -2,12 +2,10 @@ function setTheme(themeId) {
 
     switch (themeId) {
         case 0:
-            console.log('Night time')
             document.body.style.backgroundColor = 'rgb(0, 1, 87)';
             document.body.style.color = '#c7c5ff';
             break;
         case 1:
-            console.log('Day time')
             document.body.style.backgroundColor = 'white';
             document.body.style.color = 'black';
         default:
@@ -24,9 +22,9 @@ const quotes = ['We zijn jouw rooster aan het kweken', 'Jouw rooster, ergens die
 function logIn () {
     var username, password;
 
-    if (Cookies.get('username') && Cookies.get('password')) {
-        username = Cookies.get('username');
-        password = Cookies.get('password');
+    if (localStorage.getItem('username') && localStorage.getItem('password')) {
+        username = localStorage.getItem('username');
+        password = localStorage.getItem('password');
     } else {
         username = document.querySelector('#username').value;
         password = document.querySelector('#password').value;
@@ -41,8 +39,8 @@ function logIn () {
 
     const data = {username: username, password: password}
 
-    Cookies.set('tempUsername', username);
-    Cookies.set('tempPassword', password);
+    localStorage.setItem('tempUsername', username);
+    localStorage.setItem('tempPassword', password);
 
     new ExpressRequest(
         '/login',
@@ -53,17 +51,16 @@ function logIn () {
 
 function loginCallback(result) {
    
-    console.log(result)
     if (result.error) {
         alert(result.error)
         return buildLogin();
     } else {
 
-        Cookies.set('username', Cookies.get('tempUsername'));
-        Cookies.set('password', Cookies.get('tempPassword'));
+        localStorage.setItem('username', localStorage.getItem('tempUsername'));
+        localStorage.setItem('password', localStorage.getItem('tempPassword'));
 
-        Cookies.remove('tempUsername');
-        Cookies.remove('tempPassword');
+        localStorage.removeItem('tempUsername');
+        localStorage.removeItem('tempPassword');
 
         buildSchedule(result);
     }
@@ -87,7 +84,7 @@ function buildLoader (title) {
             `
                 <div class="trip margin"></div>
                 <div class="margin" style="text-align: center">
-                    <img style="width: 40%; height: auto; margin-bottom: 20px" src="cat2.svg" />
+                    <img style="width: 40%; height: auto; margin-bottom: 20px" src="assets/cat2.svg" />
                     <p>${quotes[Math.floor(Math.random() * quotes.length)]}</p>
                 </div>
             `
@@ -112,7 +109,7 @@ function buildLogin () {
             name: 'Rooster Login',
             header: true,
             navbar: {
-                icon: 'login.png'
+                icon: 'assets/login.png'
             },
         },
         `
@@ -130,7 +127,7 @@ function buildLogin () {
             name: 'Info',
             header: true,
             navbar: {
-                icon: 'help.png'
+                icon: 'assets/help.png'
             }
         },
         `  
@@ -149,7 +146,7 @@ function buildLogin () {
             name: 'Privacy',
             header: true,
             navbar: {
-                icon: 'eye.png'
+                icon: 'assets/eye.png'
             }
         },
         `  
@@ -180,7 +177,7 @@ function buildSchedule (s) {
             name: 'Rooster',
             header: true,
             navbar: {
-                icon: 'calender.png'
+                icon: 'assets/calender.png'
             },
         },
         scheduleBuilder(s)
@@ -191,7 +188,7 @@ function buildSchedule (s) {
             name: 'Profiel',
             header: true,
             navbar: {
-                icon: 'profile.png'
+                icon: 'assets/profile.png'
             },
         },
         `
@@ -202,7 +199,6 @@ function buildSchedule (s) {
     ));
     
 }
-
 
 function scheduleBuilder(s) {
     var html = `
@@ -240,7 +236,7 @@ function scheduleBuilder(s) {
 }
 
 // Try automatic login
-if (!Cookies.get('username') || !Cookies.get('password')) {
+if (!localStorage.getItem('username') || !localStorage.getItem('password')) {
     buildLogin();
 } else {
     logIn();
@@ -248,8 +244,8 @@ if (!Cookies.get('username') || !Cookies.get('password')) {
 
 
 function logOut() {
-    Cookies.remove('username');
-    Cookies.remove('password');
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
 
     buildLogin();
 }
