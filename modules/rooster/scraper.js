@@ -135,10 +135,10 @@ module.exports = {
 function formatSubjectString(string) {
     var array = string.split('<br>');
     return {
-        subject: striptags(array[0]).replace('!', '<span style="color:red;">!!</span>'),
-        teacher: striptags(array[2]).replace('!', '<span style="color:red;">!!</span>'),
-        classRoom: striptags(array[1]).replace('!', '<span style="color:red;">!!</span>'),
-        group: striptags(array[3]).replace('!', '<span style="color:red;">!!</span>')
+        subject: striptags(array[0]).replace('!', '⚠️'),
+        teacher: striptags(array[2]).replace('!', '⚠️'),
+        classRoom: striptags(array[1]).replace('!', '⚠️'),
+        group: striptags(array[3]).replace('!', '⚠️')
     }
 }
 

@@ -1,25 +1,30 @@
-function setTheme(themeId) {
-
-    switch (themeId) {
-        case 0:
-            document.body.style.backgroundColor = 'rgb(0, 1, 87)';
-            document.body.style.color = '#c7c5ff';
-            break;
-        case 1:
-            document.body.style.backgroundColor = 'white';
-            document.body.style.color = 'black';
-        default:
-            break;
-    }
-}
-setTheme(0);
-
 var app;
-
 const days = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag'];
 const times = ['', '8:15 - 9:15', '9:15 - 10:15', '10:30 - 11:30', '11:30 - 12:30', '13:00 - 14:00', '14:00 - 15:00', '15:15 - 16:15', '16:15 - 17:15', '17:30 - 18:30', '18:30 - 19:30'];
-const quotes = ['We zijn jouw rooster aan het kweken', 'Jouw rooster, ergens diep in de VPN zooi', 'We zijn hard op zoek naar je rooster', 'Mooi dagje vandaag?', "Rooster toevoegen aan je homescreen? Check 'help'"]
-function logIn () {
+const quotes = ['We zijn jouw rooster aan het kweken', 'Jouw rooster, ergens diep in de VPN zooi', 'We zijn hard op zoek naar je rooster', 'Mooi dagje vandaag?', "Rooster al toegevoegd aan je homescreen?"];
+
+var theme = new ThemeifyTheme(
+    [
+        // Mobileify element
+        new ThemeifyElement(
+            '.mobileify',
+            new ThemeifyCss(
+                'background-color: #ffffff; color: #000000;', // CSS Light theme
+                'background-color: rgb(0, 1, 87); color: #c7c5ff;' // CSS Dark theme
+            ),
+        ),
+        // Button element
+        new ThemeifyElement(
+            '.btn',
+            new ThemeifyCss(
+                'background-color: #c7c5ff; color: #ffffff;', // CSS Light theme
+                'background-color: #c7c5ff; color: rgb(0, 1, 87);' // CSS Dark theme
+            )
+        )
+    ]
+);
+
+function logIn() {
     var username, password;
 
     if (localStorage.getItem('username') && localStorage.getItem('password')) {
@@ -37,7 +42,7 @@ function logIn () {
 
     buildLoader('Rooster zoeken');
 
-    const data = {username: username, password: password}
+    const data = { username: username, password: password }
 
     localStorage.setItem('tempUsername', username);
     localStorage.setItem('tempPassword', password);
@@ -50,7 +55,7 @@ function logIn () {
 }
 
 function loginCallback(result) {
-   
+
     if (result.error) {
         alert(result.error)
         return buildLogin();
@@ -66,44 +71,43 @@ function loginCallback(result) {
     }
 }
 
-function buildLoader (title) {
+function buildLoader(title) {
     app = new MobileifyApp(
         {
             name: 'Rooster',
             description: 'Een net wat cleaner rooster',
-            primaryColor: 'rgb(0, 1, 87)',
-            secondaryColor: '#c7c5ff',
             navbar: false
-        })
-    
-        app.addView(new MobileifyView(
-            {
-                name: title,
-                header: true,
-            },
-            `
+        },
+        theme
+    )
+
+    app.addView(new MobileifyView(
+        {
+            name: title,
+            header: true,
+        },
+        `
                 <div class="trip margin"></div>
                 <div class="margin" style="text-align: center">
                     <img style="width: 40%; height: auto; margin-bottom: 20px" src="assets/cat2.svg" />
                     <p>${quotes[Math.floor(Math.random() * quotes.length)]}</p>
                 </div>
             `
-        ));  
+    ));
 }
 
-function buildLogin () {
+function buildLogin() {
 
     app = new MobileifyApp(
         {
             name: 'Rooster',
             description: 'Een net wat cleaner rooster',
-            primaryColor: 'rgb(0, 1, 87)',
-            secondaryColor: '#c7c5ff',
             navbar: true
-        }
-    
+        },
+        theme
+
     );
-    
+
     app.addView(new MobileifyView(
         {
             name: 'Rooster Login',
@@ -117,11 +121,11 @@ function buildLogin () {
         <input class="btn" style="width: 100%;" id="username" type="username" placeholder="Leerling nummer" />
         <input class="btn" style="width: 100%;" id="password" type="password" placeholder="Wachtwoord" />
         <p class="rule">Door op 'Log in' te klikken ga je akkoord met de <u onclick="app.changeView('Privacy')">privacy</u> pagina.</p>
-        <button class="btn" style="width: 100%;"  onclick="logIn()" >Log in</button>
+        <button class="btn" style="width: 100%; "  onclick="logIn()" >Log in</button>
         </div>
         `
     ));
-    
+
     app.addView(new MobileifyView(
         {
             name: 'Info',
@@ -157,21 +161,20 @@ function buildLogin () {
         <p class="rule">Deze site werkt allèèn, er is geen aansluiting met derde partijen.</p>
         `
     ));
-    
+
 }
 
-function buildSchedule (s) {
+function buildSchedule(s) {
 
     app = new MobileifyApp(
         {
             name: 'Rooster',
             description: 'Een net wat cleaner rooster',
-            primaryColor: 'rgb(0, 1, 87)',
-            secondaryColor: '#c7c5ff',
             navbar: true
-        }
+        },
+        theme
     );
-    
+
     app.addView(new MobileifyView(
         {
             name: 'Rooster',
@@ -182,7 +185,7 @@ function buildSchedule (s) {
         },
         scheduleBuilder(s)
     ));
-    
+
     app.addView(new MobileifyView(
         {
             name: 'Profiel',
@@ -190,14 +193,20 @@ function buildSchedule (s) {
             navbar: {
                 icon: 'assets/profile.png'
             },
+            onload: setThemeSwitch
         },
         `
         <p class="rule">Bedankt voor het gebruiken van Rooster. Bekijk hier jouw profiel.</p>
         <p class="rule">Rooster slaat jouw gegevens <strong>niet</strong> op.</p>
+        <p class="rule">Licht of donker?</p>
+        <div class="onoffswitch rule">
+        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" onclick="toggleTheme(this.checked)">
+        <label class="onoffswitch-label" for="myonoffswitch"></label>
+        </div>
         <button class="btn rule" onclick="logOut()" >Log uit</button>
         `
     ));
-    
+
 }
 
 function scheduleBuilder(s) {
@@ -206,7 +215,7 @@ function scheduleBuilder(s) {
         <h2>${s.studentName}</h2>
         <p>${s.date}</p>
     </div>
-        <div class="days-holder" style="margin-bottom: 150px;">
+        <div class="days-holder">
     `;
 
     for (let i = 0; i < 5; i++) {
@@ -225,7 +234,7 @@ function scheduleBuilder(s) {
         }
         if (c == 0) {
             html += `
-            <a><h3>Makkelijk daggieeee</h3></a>
+            <a><h3>Makkelijk daggieeee </h3></a>
         `;
         }
         html += '</div>';
@@ -235,6 +244,17 @@ function scheduleBuilder(s) {
     return html += '</div>';
 }
 
+function logOut() {
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+
+    buildLogin();
+}
+
+function toggleTheme (checked) {
+    checked = !checked;
+    app.setTheme(checked ? 'light' : 'dark');
+}
 // Try automatic login
 if (!localStorage.getItem('username') || !localStorage.getItem('password')) {
     buildLogin();
@@ -242,10 +262,6 @@ if (!localStorage.getItem('username') || !localStorage.getItem('password')) {
     logIn();
 }
 
-
-function logOut() {
-    localStorage.removeItem('username');
-    localStorage.removeItem('password');
-
-    buildLogin();
+function setThemeSwitch () {
+    document.querySelector('#myonoffswitch').checked = localStorage.getItem('ThemeifyTheme') == 'light' ? false : true ;
 }

@@ -1,12 +1,11 @@
 // Server version
-
 const express = require('express');
 const formidable = require('express-formidable');
 var port = process.env.PORT || 443;
 
 const app = express();
 const fs = require('fs');
-const scraper = require('./scraper');
+const scraper = require('./modules/rooster/scraper');
 
 // Certificate
 const privateKey = fs.readFileSync('./ssl/privkey.pem', 'utf8');

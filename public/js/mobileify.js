@@ -1,17 +1,30 @@
 /**
  * Mobileify
- * Version: 0.0.1
+ * Version: 0.0.3
  * Author: Bas Wilson
  * Hosted at https://npmawesome.net
  * Check for updates at https://npmawesome.net/library/mobileify
  */
 
+var loadedMobileifyApp;
+
 class MobileifyApp {
-    constructor(properties) {
+    /**
+     * 
+     * @param {*} properties 
+     * @param {ThemeifyTheme} theme 
+     */
+    constructor(properties, theme) {
         this.properties = properties;
+        this.theme = theme;
         this.navigator = new MobileifyNavigator();
         this.navbar = properties.navbar ? new MobileifyNavbar() : null
+
+        // Get the theme that is saved in the local storage
+        this.enabledTheme = localStorage.getItem('ThemeifyTheme') == "light" ? 'light' : 'dark';
+
         this.buildApp().then(() => {
+            loadedMobileifyApp = this;
             this.changeView();
         });
     }
@@ -70,11 +83,8 @@ class MobileifyApp {
             body {
                 margin: 0px;
                 padding: 0px;
-                
             }
             .mobileify {
-                background-color: ${this.properties.primaryColor};
-                color: ${this.properties.secondaryColor};
                 font-family: googlesans;
             }
 
@@ -88,29 +98,27 @@ class MobileifyApp {
                 line-height: 50px;
                 position: fixed;
                 top: 0px;
+                right: 0px;
+                left: 0px;
                 border-bottom: 1px solid rgba(199,197,255,.1);
             }
 
             .mob-content {
-                height: 100%;
                 position: fixed;
                 top: 70px;
                 left: 0px;
                 right: 0px;
                 bottom: ${this.navbar ? '70px' : '0px'};
-                overflow-y: scroll;
             }
 
             .mob-view {
                 position: absolute;
-                height: 100%;
-                width: 100%;
                 top: 0px;
                 left: 0px;
                 right: 0px;
                 bottom: 0px;
-                -webkit-animation-name: navigate;
-                -webkit-animation-duration: .3s;
+                overflow-y: scroll;
+                -webkit-overflow-scrolling: touch;
             }
 
             .mob-navbar {
@@ -165,6 +173,15 @@ class MobileifyApp {
         `;
     }
 
+    /**
+     * Sets the theme to light or dark mode
+     * @param {string} themeStyle 
+     */
+    setTheme(themeStyle) {
+        this.enabledTheme = themeStyle;
+        theme.applyTheme(this.enabledTheme);
+    }
+
 }
 
 class MobileifyNavbar {
@@ -185,6 +202,7 @@ class MobileifyNavbar {
             </div>`;
         }
         this.renderedNavbar = barItems;
+
         if (this.rendered) {
             document.querySelector('.mob-navbar').innerHTML = this.renderedNavbar;
         }
@@ -199,16 +217,17 @@ class MobileifyNavbar {
     }
 
     updateSelectedNavItem(navItemName) {
-        if (this.selectedNavItem) 
+        if (this.selectedNavItem)
             document.querySelector(`[data-navitem="${this.selectedNavItem}"]`).classList.remove('mob-navbar-item-selected');
 
-        if (!navItemName) 
+        if (!navItemName)
             navItemName = this.navItems[0].text;
 
         document.querySelector(`[data-navitem="${navItemName}"]`).classList.add('mob-navbar-item-selected');
         this.selectedNavItem = navItemName;
     }
 }
+
 class MobileifyNavigator {
 
     constructor() {
@@ -217,6 +236,10 @@ class MobileifyNavigator {
         this.navigating = false;
     }
 
+    /**
+     * 
+     * @param {string} viewName 
+     */
     changeView(viewName) {
         this.navigating = true;
         if (!viewName)
@@ -228,6 +251,10 @@ class MobileifyNavigator {
         });
     }
 
+    /**
+     * 
+     * @param {string} viewName 
+     */
     renderView(viewName) {
         return new Promise(resolve => {
 
@@ -236,25 +263,37 @@ class MobileifyNavigator {
                     // console.log(this.views)
                     document.querySelector('.mob-header').style.display = this.views[i].properties.header ? 'block' : 'none';
                     document.querySelector('.mob-content').style.top = this.views[i].properties.header ? '70px' : '0px';
-                    return resolve({renderedView: this.views[i], viewIndex: i});
+
+                    return resolve({ renderedView: this.views[i], viewIndex: i });
                 }
             }
             return resolve(false);
         });
     }
 
-    closeView(viewName) {
-
-    }
-
+    /**
+     * 
+     * @param {MobileifyView} renderedView 
+     * @param {number} viewIndex 
+     */
     animateViewSwitch(renderedView, viewIndex) {
+
         if (this.currentView) {
             document.querySelector(`#mob-view-${this.currentView}`).style.display = 'none';
         }
 
+        // If the view has not been assigned to HTML yet (loaded)
         if (!renderedView.loaded) {
             document.querySelector('.mob-content').innerHTML += renderedView.view;
         }
+
+        // Now that the page has been rendered and fully assigned to the HTML, apply the theme
+        loadedMobileifyApp.setTheme(loadedMobileifyApp.enabledTheme);
+
+        // Lock the body scroll, webkit fix for ios
+        bodyScrollLock.disableBodyScroll(document.querySelector(`#mob-view-${renderedView.name}`));
+        
+
         document.querySelector('#mob-header-text').innerHTML = renderedView.properties.name;
         document.querySelector(`#mob-view-${renderedView.name}`).style.display = 'block';
 
@@ -275,6 +314,11 @@ class MobileifyNavigator {
 
 class MobileifyView {
 
+    /**
+     * 
+     * @param {*} properties 
+     * @param {string} html 
+     */
     constructor(properties, html) {
         this.properties = properties;
         this.name = this.properties.name.replace(' ', '_').toLowerCase();

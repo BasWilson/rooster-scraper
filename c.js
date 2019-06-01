@@ -5,7 +5,7 @@ const formidable = require('express-formidable');
 
 const app = express();
 const fs = require('fs');
-const scraper = require('./scraper');
+const scraper = require('./modules/rooster/scraper');
 
 const http = require('http').Server(app)
 app.use(formidable());
